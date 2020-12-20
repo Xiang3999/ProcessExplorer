@@ -5,10 +5,10 @@ public class waiting {
 	int BlockNum;           // 阻塞的资源数量
 	PCB pcb;             // 指向PCB块
 
-	waiting(int BlockPID, int BlockNum, PCB* pcb)
+	waiting(int BlockPID, int BlockNum, PCB p)
 	{
 		this.BlockPID = BlockPID;
 		this.BlockNum = BlockNum;
-		this.pcb = pcb;
+		this.pcb = p;
 	}
 }
