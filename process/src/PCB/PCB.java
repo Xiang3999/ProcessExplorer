@@ -244,10 +244,10 @@ public class PCB {
     	}
     	return false;
     }
-    //返回资源列表第一个rid
-    public int getResourcesFirstRCB() 
+    //返回资源列表第一个RCB
+    public RCB getResourcesFirstRCB() 
     {
-    	return this.Resource.firstElement().rcb.getRid();  
+    	return this.Resource.firstElement().rcb;  
     }
     public void showThisProcess()
     {
@@ -258,7 +258,4 @@ public class PCB {
     	System.out.println("\t"+this.getList());
     	System.out.println("priority\t"+this.getPriority());
     }
-    
-    
-
 }
