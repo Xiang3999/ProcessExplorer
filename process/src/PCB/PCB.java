@@ -55,7 +55,7 @@ public class PCB {
     	this.pid=pid;
     	this.pname=pName;
     	this.prioirty=priority;
-    	if(pName=="init")
+    	if(pName.equals("init"))
     	{
     		this.pStatus.pType = processType.READY;
         	this.pStatus.pList = processList.READYLIST;
@@ -219,7 +219,11 @@ public class PCB {
     	}
     	return this.pTree.parent.toString();
     }
-    //返回占有资源列表的占有数量
+    /**
+     * 返回占有资源列表的占有数量
+     * @param rcbId
+     * @return
+     */
     public int getResourcesOwnNum(int rcbId)
     {
     	for(Resource iter:Resource)
@@ -239,7 +243,10 @@ public class PCB {
     		System.out.print(iter.getPname()+"  ");
     	}
     }
-    //检查是否有子进程
+    /**
+     * 检查是否有子进程,有子进程返回true
+     * @return
+     */
     public boolean getpTreeEmpty()
     {
     	if(pTree.child.size()>0)
@@ -248,12 +255,18 @@ public class PCB {
     	}
     	return false;
     }
-    //第一个子进程pid
+    /**
+     * 返回第一个子进程pid
+     * @return
+     */
     public int getpTreeFirstChild()
     {
     	return this.pTree.child.get(0).getPid();
     }
-    //检查 资源列表是否为空
+    /**
+     * 检查 资源列表是否为空,为空返回false
+     * @return
+     */
     public boolean getResourcesEmpty()
     {
     	if(this.Resource.size()>0)
@@ -265,6 +278,7 @@ public class PCB {
     //返回资源列表第一个RCB
     public RCB getResourcesFirstRCB() 
     {
+    	
     	return this.Resource.firstElement().rcb;  
     }
     public void showThisProcess()

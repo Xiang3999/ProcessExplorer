@@ -179,7 +179,7 @@ public class processManage {
 	{
 		for (PCB iter:processTable)
 		{
-			if(iter.getPname()==pName)
+			if(pName.equals(iter.getPname()))
 			{
 				return iter;
 			}
@@ -204,7 +204,7 @@ public class processManage {
 	{
 		for(PCB iter:processTable)
 		{
-			if(iter.getPname()==pName)
+			if(pName.equals(iter.getPname()))
 			{
 				return true;
 			}
@@ -251,7 +251,7 @@ public class processManage {
 		PCB tempPCB;
 
 		// 查询进程 是否有占有的资源
-		while (pcb.getResourcesEmpty() == false)  // 不为空
+		while (pcb.getResourcesEmpty() == true)  // 不为空
 		{
 			rcb = pcb.getResourcesFirstRCB();  // 获取第一个RCB
 			// 将资源 rcb 从pcb 进程 Resources占有资源列表中移除

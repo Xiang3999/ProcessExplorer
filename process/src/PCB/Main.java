@@ -16,22 +16,28 @@ public class Main {
     
     public static void main(String[] args)
     {
-    	System.out.println("******************************************");
-    	System.out.println("***********Process  Manager************");
-    	System.out.println("******************************************");
+    	System.out.println(" ____  ____   __    ___  ____  ____  ____ \r\n" + 
+    			"(  _ \\(  _ \\ /  \\  / __)(  __)/ ___)/ ___)\r\n" + 
+    			" ) __/ )   /(  O )( (__  ) _) \\___ \\\\___ \\\r\n" + 
+    			"(__)  (__\\_) \\__/  \\___)(____)(____/(____/ \r\n" + 
+    			" _  _   __   __ _   __    ___  ____  ____ \r\n" + 
+    			"( \\/ ) / _\\ (  ( \\ / _\\  / __)(  __)(  _ \\\r\n" + 
+    			"/ \\/ \\/    \\/    //    \\( (_ \\ ) _)  )   /\r\n" + 
+    			"\\_)(_/\\_/\\_/\\_)__)\\_/\\_/ \\___/(____)(__\\_)");
+    	System.out.println("    ____  _  _        ____   __    __  \r\n" + 
+    			"   (  _ \\( \\/ )      (  _ \\ / _\\  /  \\ \r\n" + 
+    			"    ) _ ( )  /        ) __//    \\(  O )\r\n" + 
+    			"   (____/(__/        (__)  \\_/\\_/ \\__/ ");
     	initCmd();
     	processManagerRun.createResources();
-    	ShowCmdHelp();
-    	
-    	System.out.print(">> ");
-        command=scanner.nextLine();
-        command=command.trim();//删除空白开头
+    	//ShowCmdHelp();
         while(quit_flag!=false){
-            exeCmd(command);
+            
             System.out.print(">> ");
             command=null;
             command=scanner.nextLine();
             command=command.trim();
+            exeCmd(command);
         }
     	
     }
@@ -41,11 +47,11 @@ public class Main {
     	illegalShow=processManagerRun.createProcess("init", 0);
     	if(illegalShow==1)
     	{
-    		System.out.println("init 进程创建成功 !");
+    		System.out.println("init process Created Successed!");
     	}
     	else 
     	{
-    		System.out.println("init 进程创建失败 !");
+    		System.out.println("init process Created Default!");
     	}
     }
     private static void exeCmd(String command)
@@ -57,12 +63,12 @@ public class Main {
 		{
 		case "cr":
 			if(cmds.length!=3) {
-				System.out.println("error: cr [pName] [priority]");
+				System.out.println("error: cr <pName> <priority>");
 				return;
 			}
 			if(Integer.valueOf(cmds[2])!=1&&Integer.valueOf(cmds[2])!=2)
 			{
-				System.out.println("error: cr [pName] [priority=0  or 1]");
+				System.out.println("error: cr <pName> <priority>(=1 or 2)");
 				return;
 			}
 			key=processManagerRun.createProcess(cmds[1],Integer.valueOf(cmds[2]));
@@ -98,7 +104,7 @@ public class Main {
 				key = processManagerRun.requestResources(cmds[1], requestNum);
 				break;
 			default:
-				System.out.println("error:req [r-name] [number]");
+				System.out.println("error:req <r-name> <number>");
 				return ;
 			}
 
@@ -170,23 +176,23 @@ public class Main {
 				break;
 			}
 			return ;
-		case "sready":
+		case "rq":
 			if(cmds.length==1)
 			{
 				processManagerRun.showReadyList();
 			}
 			else
-				System.out.print("error: sready");
+				System.out.print("error: rq");
 			return;
-		case "sres":
+		case "rt":
 			if(cmds.length==1)
 			{
 				processManagerRun.showResourcessTable();
 			}
 			else
-				System.out.print("error: sres");
+				System.out.print("error: rt");
 			return ;
-		case "ps":
+		case "pt":
 			if(cmds.length==1)
 			{
 				processManagerRun.showProcessTable();
@@ -200,28 +206,33 @@ public class Main {
 				processManagerRun.Schedule();
 			}
 			else
-				System.out.print("error: ps");
+				System.out.print("error: to");
 			return ;
-		case "quit":
-			System.out.println("QUIT");
+		case "h":
+			ShowCmdHelp();
+			return;
+		case "q":
+			System.out.println("Goodbye!");
 			quit_flag=false;
 			return ;
 		default:
+			System.out.println("非法指令！");
 			break;
 		}
     }
     private static void ShowCmdHelp()
     {
-    	System.out.println("------------------- Help ----------------------");
-    	System.out.println("创建进程:     cr [pName] [priority] 如:cr x 1");
-    	System.out.println("撤销进程:     de [pName]            如: de x " );
-    	System.out.println("请求资源:     req [r-name] [number] 如: req R1 2");
-    	System.out.println("释放资源:     rel [r-name] [number] 如: rel R1 2");
-    	System.out.println("显示就绪队列: sready");
-    	System.out.println("显示资源表:   sres" );
-    	System.out.println("显示进程表:   ps" );
-    	System.out.println("时间片切换:   to" );
-    	System.out.println("退出Cmd:      quit");
-    	System.out.println("-------------------------------------------------" );
+    	System.out.println("___________________________________________________________");
+    	System.out.println("cr\tCreate Process eg:cr <name> <priority>(=1 or 2)");
+    	System.out.println("de\tDelete Process eg:de <pName> " );
+    	System.out.println("req\tRequest Resource eg:req <resource name> <# of units>");
+    	System.out.println("rel\tRelease Resource eg:rel <resource name> <# of units>");
+    	System.out.println("rq\tShow Ready Queue");
+    	System.out.println("rt\tShow Resource Table" );
+    	System.out.println("pt\tShow Process Table" );
+    	System.out.println("to\tTime Out" );
+    	System.out.println("q\tQuit");
+    	System.out.println("h\tHelp");
+    	System.out.println("___________________________________________________________");
     }
 }
