@@ -24,21 +24,30 @@ class processStatus
 {
 	processType pType; // 进程状态
 	processList pList; // 进程队列
+	public processStatus()
+	{
+		
+	}
 }
 class processCreationTree
 {
 	PCB parent;
-	List<PCB> child;
+	List<PCB> child ;
+	public processCreationTree()
+	{
+		this.parent=null;
+		this.child= new ArrayList<>();
+	}
 };
 public class PCB {
     private int pid;//正在运行的process id
     private String pname;
 
-    processStatus pStatus;         // 进程状态 
+    processStatus pStatus =new processStatus();         // 进程状态 
 	   //         - Type[READY就绪态, RUNNING运行态, BLOCKED阻塞态]
 	   //         - List[READYLIST就绪等待队列, BLOCKLIST阻塞等待队列]
-    private Vector<Resource>Resource;
-	processCreationTree pTree;     // 进程树 
+    private Vector<Resource>Resource=new Vector<>();
+	processCreationTree pTree=new processCreationTree();     // 进程树 
     private processPriorities prioirty;
 	// 构造函数
     public PCB(int pid, String pName, processPriorities priority, PCB parent)
@@ -46,9 +55,19 @@ public class PCB {
     	this.pid=pid;
     	this.pname=pName;
     	this.prioirty=priority;
-    	this.pTree.parent=parent;
-    	if (parent != null)
+    	if(pName=="init")
     	{
+    		this.pStatus.pType = processType.READY;
+        	this.pStatus.pList = processList.READYLIST;
+        	return;
+    	}
+    	if(parent==null)
+    	{
+    		System.out.print("error:parent==NULL");
+    	}
+    	else
+    	{
+    		this.pTree.parent=parent;
     		parent.addChild(this);
     	}
 
@@ -196,8 +215,7 @@ public class PCB {
     {
     	if(this.pTree.parent==null)
     	{
-    		System.out.println("没有父进程");
-    		return this.pTree.parent.toString();
+    		return "null";
     	}
     	return this.pTree.parent.toString();
     }

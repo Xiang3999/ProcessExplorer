@@ -4,18 +4,18 @@ import java.util.*;
 
 public class processManage {
 	private PCB runningProcess;                // 正在执行进程指针
-	private Vector<PCB> processTable;          // 进程表
+	private Vector<PCB> processTable = new Vector<>();          // 进程表
 	private int allocation_pid;                 // 进程id分配(自增)
 
-	private Vector<RCB> resourcesTable;        // 资源列表
+	private Vector<RCB> resourcesTable = new Vector<>();        // 资源列表
 
 	// 三级就绪进程队列
-	private List<PCB> initReadyList;
-	private List<PCB> userReadyList;
-	private List<PCB> systemReadyList;
+	private List<PCB> initReadyList=new ArrayList<>();
+	private List<PCB> userReadyList=new ArrayList<>();
+	private List<PCB> systemReadyList=new ArrayList<>();
 
 	// 阻塞队列
-	private List<PCB> blockList;  
+	private List<PCB> blockList=new ArrayList<>();  
 
 	
 
@@ -69,7 +69,7 @@ public class processManage {
 			System.out.println("[warnning]高优先级抢占,切换进程 " + runningProcess.getPname() + " 运行");
 		}
 
-		return 0;
+		return 1;
 	}
 	// 撤销进程
 	public int destoryProcess(String pName)
@@ -79,7 +79,30 @@ public class processManage {
 			return 2;
 		PCB deldata=this.findProcessbyName(pName);
 		delChildProcess(deldata);
-		return 0;
+		return 1;
+	}
+	public void Schedule()
+	{
+		// 当有2级进程
+		if (systemReadyList.size() != 0)
+		{
+			systemReadyList.remove(0);                // 移除system 就绪列表第一个
+			systemReadyList.add(runningProcess);  // 把它放入就绪表队列末尾
+			runningProcess.changeReady();
+			runningProcess.changeREADYLIST();
+			runningProcess = systemReadyList.get(0);   // 正在执行进程指针 指向就绪队列第一个
+			runningProcess.changeRunning();
+		}
+		else  // 当没有2级进程的, 只有1级就绪队列
+		{
+			userReadyList.remove(0);                  // 移除user 就绪列表第一个
+			userReadyList.add(runningProcess);    // 把它放入就绪表队列末尾
+			runningProcess.changeReady();
+			runningProcess.changeREADYLIST();
+			runningProcess = userReadyList.get(0);     // 正在执行进程指针 指向就绪队列第一个
+			runningProcess.changeRunning();
+		}
+
 	}
 	public int delChildProcess(PCB pcb)
 	{
@@ -95,7 +118,61 @@ public class processManage {
 			this.delChildProcess(tempPCB);
 		}
 		RCB rcb;
-		temp=
+		temp=this.freeResource(pcb);
+		if(temp!=1)
+		{
+			System.out.println("error");
+		}
+		//调度
+		if(pcb==runningProcess)// 如是执行态进程 第一个就绪态
+		{
+			if(systemReadyList.size()==1)// 如果高级system就绪进程队列就剩下执行态进程自己一个 降级
+			{
+				runningProcess=userReadyList.get(userReadyList.size()-1);
+				systemReadyList.remove(0);
+			}
+			else if(userReadyList.size()==1)
+			{
+				runningProcess=initReadyList.get(initReadyList.size()-1);
+				userReadyList.remove(0);
+			}
+			else
+			{
+				this.Schedule();
+				if (pcb.getPriority() == 1)
+				{
+					this.delUserReadyList(pcb);
+				}
+				else if (pcb.getPriority() == 2)
+				{
+					this.delSystemReadyList(pcb);
+				}
+				else
+				{
+
+				}
+			}
+				
+		}
+		else if (pcb.getType() == "READY")  // 就绪
+		{
+			if (pcb.getPriority() == 1)
+			{
+				this.delUserReadyList(pcb);
+			}
+			else if (pcb.getPriority() == 2)
+			{
+				this.delSystemReadyList(pcb);
+			}
+			else   
+			{
+
+			}
+		}  // 前面已经处理完 阻塞态
+		System.out.println( "进程 " + pcb.getPname() + "已撤销!" );
+		// 释放 PCB 空间
+		this.delProcesstable(pcb);
+		pcb.deleteFather();
 		return 0;
 	}
 	public PCB findProcessbyName(String pName)
@@ -153,7 +230,7 @@ public class processManage {
 	{
 		for(PCB iter:processTable)
 		{
-			if(iter.getPname()==pName)
+			if(pName.equals(iter.getPname()))
 			{
 				return true;
 			}
@@ -306,10 +383,10 @@ public class processManage {
 **********************************************/
 	public void createResources()
 	{
-		RCB rcb1=new RCB(1,"R1",1);
-		RCB rcb2=new RCB(1,"R2",1);
-		RCB rcb3=new RCB(1,"R3",1);
-		RCB rcb4=new RCB(1,"R4",1);
+		RCB rcb1=new RCB(1,"R1",3);
+		RCB rcb2=new RCB(2,"R2",1);
+		RCB rcb3=new RCB(3,"R3",2);
+		RCB rcb4=new RCB(4,"R4",1);
 		this.resourcesTable.add(rcb1);
 		this.resourcesTable.add(rcb2);
 		this.resourcesTable.add(rcb3);
@@ -397,11 +474,109 @@ public class processManage {
 		return 4;
 		
 	}
+	public int releaseResources(String rName,int number)
+	{
+		int operand = 0;  // 操作数
+		int tempPID = -1;
+		int tempNUM = 0;
+		
+		PCB tempPCB;
+		//检查是否有此资源,没有就退出
+		if(this.checkResourcesName(rName)==false)
+		{
+			return 2;
+		}
+		//是否超过资源总量
+		if(this.checkResourcesInitnum(rName,number))
+		{
+			return 3;
+		}
+		// 根据 rName 找到相应 RCB块
+		RCB rcb = this.findResourcesByName(rName);		
+		// release
+		
+		// 将资源 rcb 从从当前进程 Resources占有资源列表中移除
+		// 并资源状态 数量rStatus + number
+		operand = runningProcess.delResource(number, rcb);
+
+		if (operand == 0)  // 释放资源数量无效
+		{
+			return 4;
+		} 
+		else if (operand == -1) // 该进程无该资源
+		{
+			return 5;
+		}
+		else
+		{
+			rcb.releaseR(operand);  // rStatus + number
+		}
+		// 跟正在执行进程无关
+		// 如果阻塞队列不为空, 且阻塞队列首部进程需求的资源数 req 小于等于可用资源数量 u，则唤醒这个阻塞进程，放入就绪队列
+		while((rcb.waitingListEmpty()==false)&&(rcb.isWaitingList()==true))
+		{
+			rcb.requestR(rcb.getWaitingListFirstNum());//减少请求资源数量
+			tempPID=rcb.getWaitingListFirstPID();
+			tempNUM=rcb.getWaitingListFirstNum();
+			tempPCB=this.findProcessbyID(tempPID);
+			PCB changePCB=tempPCB;
+			rcb.delWaitingList(); // 从资源的阻塞队列中移除 第一个进程
+			changePCB.changeReady();
+			changePCB.changeREADYLIST();
+			changePCB.addResourse(tempNUM, rcb);
+			// 插入 changePCB 到就绪队列 
+			// 基于优先级的抢占式调度策略，因此当有进程获得资源时，需要查看当前的优先级情况并进行调度
+			switch(changePCB.getPriority())
+			{
+			case 0:
+				this.delBlockList(changePCB);
+				initReadyList.add(changePCB);
+				System.out.println("进程 " + changePCB.getPname() + " 就绪!" );
+				break;
+			case 1:
+				if(userReadyList.size()==0)
+				{
+					this.delBlockList(changePCB);
+					userReadyList.add(changePCB);
+					System.out.println("[warnning]进程 " + changePCB.getPname() + " 就绪!");
+					runningProcess = changePCB;  // 高优先级抢占运行
+					changePCB.changeRunning();
+					System.out.println("[warnning]高优先级进程 " + runningProcess.getPname() + " 抢占" );
+				}
+				else
+				{
+					this.delBlockList(changePCB);
+					userReadyList.add(changePCB);
+					System.out.println("[warnning]进程 " + changePCB.getPname() + " 就绪!");
+				}
+			case 2:
+				if(systemReadyList.size()==0)
+				{
+					this.delBlockList(changePCB);
+					systemReadyList.add(changePCB);
+					System.out.println("[warnning]进程 " + changePCB.getPname() + " 就绪!");
+					runningProcess = changePCB;  // 高优先级抢占运行
+					changePCB.changeRunning();
+					System.out.println("[warnning]高优先级进程 " + runningProcess.getPname() + " 抢占" );
+				}
+				else
+				{
+					this.delBlockList(changePCB);
+					systemReadyList.add(changePCB);
+					System.out.println("[warnning]进程 " + changePCB.getPname() + " 就绪!");
+				}
+			default:
+				break;	
+			}
+			
+		}
+		return 1;
+	}
 	public  RCB findResourcesByName(String name)
 	{
 		for (RCB data:resourcesTable)
 		{
-			if(data.getname()==name)
+			if(name.equals(data.getname()))
 			{
 				return data;
 			}
@@ -417,7 +592,8 @@ public class processManage {
 	{
 		for (RCB data:resourcesTable)
 		{
-			if(data.getname()==name)
+			//字符串判等的时候使用equals(),因为==是判断引用的地址
+			if(name.equals(data.getname()))
 			{
 				return true;
 			}
@@ -434,7 +610,7 @@ public class processManage {
 	{
 		for (RCB data:resourcesTable)
 		{
-			if(data.getname()==rName)
+			if(rName.equals(data.getname()))
 			{
 				if(data.getInitNum()>=num)
 				{
@@ -463,4 +639,85 @@ public class processManage {
 		}
 		return 0;
 	}
+	/*************************************************************
+	 *  processManager
+	 *  get() - show()
+	 *************************************************************/
+	public int getRunningProcess()
+	{
+		return this.runningProcess.getPid();
+	}
+	public void showReadyList()
+	{
+		System.out.println("===>ReadyList");
+		System.out.print("System Ready List:");
+		for(PCB iter:systemReadyList)
+		{
+			if(runningProcess.getPid()==iter.getPid())
+				System.out.print("=>");
+			System.out.print(" "+iter.getPname());
+		}
+		System.out.print("\n");
+		System.out.print("User   Ready List:");
+		for(PCB iter:userReadyList)
+		{
+			if(runningProcess.getPid()==iter.getPid())
+				System.out.print("=>");
+			System.out.print(" "+iter.getPname());
+		}
+		System.out.print("\n");
+		System.out.print("Init   Ready List:");
+		for(PCB iter:initReadyList)
+		{
+			if(runningProcess.getPid()==iter.getPid())
+				System.out.print("=>");
+			System.out.print(" "+iter.getPname());
+		}
+		System.out.print("\n");
+	}
+	/**
+	 * 展示进程列表
+	 */
+	public void showProcessTable()
+	{
+		System.out.println("===> ProcessTable");
+		System.out.println("PID\t NAME\t PRIORITY\t TYPE\t LIST\t FATHER\t CHILD");
+		for(PCB iter:processTable)
+		{
+			System.out.print(iter.getPid()+"\t"+iter.getPname()+"\t"
+		+iter.getPriority()+"\t"+iter.getType()+"\t"+iter.getList()+"\t"+iter.getFather()+"\t");
+			iter.showChilds();
+			System.out.print("\n");
+			
+		}
+	}
+	/**
+	 * 展示资源列表
+	 */
+	public void showResourcessTable()
+	{
+		System.out.println("===> ProcessTable");
+		System.out.println("NAME\t NUMBER");
+		for(RCB iter:resourcesTable)
+		{
+			System.out.print(iter.getname()+"\t"+iter.getNum());
+			System.out.print("\n");
+			
+		}
+	}
+	public void showBlockList()
+	{
+		int n=0;
+		System.out.println("===> BlockList");
+		for (RCB iter:resourcesTable)
+		{
+			System.out.print("*R");
+			n++;
+			System.out.print(n+"\t");
+			iter.showWaitingListEach();
+			System.out.print("\n");	
+		}
+
+	}
+	
 }

@@ -7,7 +7,7 @@ public class RCB {
 	private String rName;                 // 资源名
 	private int rStatus;                  // 资源状态 数量
 	private int initNum;                  // 初始化数量
-	private List<waiting> waitingList;    // 资源阻塞等待队列
+	private List<waiting> waitingList = new ArrayList<>();    // 资源阻塞等待队列
 	// 构造函数
 	public RCB(int rid, String rName, int initNum)
 	{
@@ -63,7 +63,10 @@ public class RCB {
 	{
 		waitingList.remove(0);
 	}
-	//判断阻塞队列首部进程需求的资源数是否小于等于可用资源数量
+	/**
+	 * 判断阻塞队列首部进程需求的资源数是否小于等于可用资源数量 
+	 * @return
+	 */
 	
 	public boolean isWaitingList()
 	{
@@ -97,9 +100,13 @@ public class RCB {
 	{
 		return this.initNum;
 	}
+	/**
+	 * 阻塞队列是否为空   如果为空返回true
+	 * @return
+	 */
 	public boolean waitingListEmpty()
 	{
-		if(this.waitingList.size()>0)
+		if(this.waitingList.size()==0)
 		{
 			return true;
 		}
