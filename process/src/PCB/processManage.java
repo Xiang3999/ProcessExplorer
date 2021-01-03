@@ -71,7 +71,11 @@ public class processManage {
 
 		return 1;
 	}
-	// 撤销进程
+	/**
+	 *  撤销进程
+	 * @param pName
+	 * @return
+	 */
 	public int destoryProcess(String pName)
 	{
 		//查看删除进程是否在进程表里
@@ -383,10 +387,10 @@ public class processManage {
 **********************************************/
 	public void createResources()
 	{
-		RCB rcb1=new RCB(1,"R1",3);
-		RCB rcb2=new RCB(2,"R2",1);
-		RCB rcb3=new RCB(3,"R3",2);
-		RCB rcb4=new RCB(4,"R4",1);
+		RCB rcb1=new RCB(1,"r1",1);
+		RCB rcb2=new RCB(2,"r2",2);
+		RCB rcb3=new RCB(3,"r3",3);
+		RCB rcb4=new RCB(4,"r4",4);
 		this.resourcesTable.add(rcb1);
 		this.resourcesTable.add(rcb2);
 		this.resourcesTable.add(rcb3);

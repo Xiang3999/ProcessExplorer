@@ -31,13 +31,15 @@ public class Main {
     	initCmd();
     	processManagerRun.createResources();
     	//ShowCmdHelp();
-        while(quit_flag!=false){
-            
+        while(quit_flag!=false){    
+        	
             System.out.print(">> ");
             command=null;
             command=scanner.nextLine();
             command=command.trim();
+            command=command.toLowerCase();
             exeCmd(command);
+            System.out.flush();
         }
     	
     }
@@ -136,11 +138,11 @@ public class Main {
 
 				key = processManagerRun.releaseResources(cmds[1], 1);
 				break;
-
 			case 3:  // rel [r-name] [number]
 				requestNum = Integer.valueOf(cmds[2]); 
 				key = processManagerRun.releaseResources(cmds[1], requestNum);
 				break;
+				
 
 			default:
 				System.out.println("error:rel 命令不合法!" );
@@ -216,7 +218,7 @@ public class Main {
 			quit_flag=false;
 			return ;
 		default:
-			System.out.println("非法指令！");
+			//System.out.println("非法指令！");
 			break;
 		}
     }
